@@ -38,6 +38,20 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/cms',
+    hidden: true,
+    redirect: '/cms/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/cms/index.vue'),
+        name: 'CmsIndex',
+        hidden: true,
+        meta: { title: 'CMS首页', icon: 'cms' }
+      },
+    ]
+  },
+  {
     path: '/login',
     component: () => import('@/views/login'),
     hidden: true

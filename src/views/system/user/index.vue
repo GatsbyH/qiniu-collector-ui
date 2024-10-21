@@ -335,7 +335,7 @@ import { changeUserStatus, listUser, resetUserPwd, delUser, getUser, updateUser,
 
 const router = useRouter();
 const { proxy } = getCurrentInstance();
-// const { sys_normal_disable, sys_user_sex } = proxy.useDict("sys_normal_disable", "sys_user_sex");
+const { sys_normal_disable, sys_user_sex } = proxy.useDict("sys_normal_disable", "sys_user_sex");
 
 const userList = ref([]);
 const open = ref(false);
