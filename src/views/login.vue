@@ -69,6 +69,7 @@ import { getCodeImg } from "@/api/login";
 import Cookies from "js-cookie";
 import { encrypt, decrypt } from "@/utils/jsencrypt";
 import useUserStore from '@/store/modules/user'
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const userStore = useUserStore()
 const route = useRoute();
@@ -116,6 +117,7 @@ function handleLogin() {
         Cookies.remove("password");
         Cookies.remove("rememberMe");
       }
+      loginForm.value.uuid=visitorId.value
       // 调用action的登录方法
       userStore.login(loginForm.value).then(() => {
         const query = route.query;
@@ -136,13 +138,20 @@ function handleLogin() {
     }
   });
 }
+const visitorId = ref(null);
 
-function getCode() {
-  getCodeImg().then(res => {
+async function getCode() {
+  // 加载 FingerprintJS
+  const fp = await FingerprintJS.load();
+  // 获取浏览器指纹
+  const result = await fp.get();
+  visitorId.value = result.visitorId;
+  console.log(visitorId.value);
+  getCodeImg(visitorId.value).then(res => {
     captchaEnabled.value = res.captchaEnabled === undefined ? true : res.captchaEnabled;
     if (captchaEnabled.value) {
-      codeUrl.value = "data:image/gif;base64," + res.img;
-      loginForm.value.uuid = res.uuid;
+      codeUrl.value = "data:image/gif;base64," + res.data.img;
+      // loginForm.value.uuid = res.uuid;
     }
   });
 }
@@ -158,7 +167,7 @@ function getCookie() {
   };
 }
 
-// getCode();
+getCode();
 getCookie();
 </script>
 

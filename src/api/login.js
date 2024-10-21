@@ -48,9 +48,9 @@ export function logout() {
 }
 
 // 获取验证码
-export function getCodeImg() {
+export function getCodeImg(visitorId) {
   return request({
-    url: '/captchaImage',
+    url: '/captchaImage/'+ visitorId,
     headers: {
       isToken: false
     },
