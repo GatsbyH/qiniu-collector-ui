@@ -97,7 +97,21 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
-  }
+  },
+    {
+      path: '/developers',
+      component: Layout,
+      hidden: true,
+      redirect: 'noredirect',
+      children: [
+        {
+          path: 'field/:field',
+          component: () => import('@/views/github/developers'),
+          name: 'developers',
+          meta: { title: '开发者列表', icon: 'user'  }
+        }
+      ]
+    },
 ]
 
 // 动态路由，基于用户权限动态去加载
