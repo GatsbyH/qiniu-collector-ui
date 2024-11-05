@@ -1,3 +1,14 @@
+<style>
+.link-style {
+  color: #007BFF; /* 蓝色链接 */
+  text-decoration: none; /* 去除下划线 */
+}
+
+.link-style:hover {
+  color: #0056b3; /* 鼠标悬停时颜色变深 */
+  text-decoration: underline; /* 鼠标悬停时添加下划线 */
+}
+</style>
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
@@ -29,6 +40,14 @@
         <el-input
             v-model="queryParams.field"
             placeholder="请输入用户领域"
+            clearable
+            @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="国家" prop="field">
+        <el-input
+            v-model="queryParams.nation"
+            placeholder="请输入国家"
             clearable
             @keyup.enter="handleQuery"
         />
@@ -140,8 +159,8 @@
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">更新数据</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        <el-button icon="Refresh" :loading="loadingDevelopers"  @click="startGetDeveloper" >拉取数据</el-button>
-        <el-button icon="Delete" @click="stopGetDeveloper">停止拉取数据</el-button>
+<!--        <el-button icon="Refresh" :loading="loadingDevelopers"  @click="startGetDeveloper" >拉取数据</el-button>-->
+<!--        <el-button icon="Delete" @click="stopGetDeveloper">停止拉取数据</el-button>-->
       </el-form-item>
     </el-form>
 
@@ -187,13 +206,13 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="developersList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
+    <el-table  v-loading="loading" :data="developersList" @selection-change="handleSelectionChange">
+      <el-table-column  type="selection" width="55" align="center" />
 <!--      <el-table-column label="主键ID，自动增长" align="center" prop="id" />-->
       <el-table-column label="用户名" align="center" prop="login" />
       <el-table-column label="真实姓名" align="center" prop="name" />
       <el-table-column label="用户类型" align="center" prop="type" />
-      <el-table-column label="头像URL" align="center" prop="avatarUrl" width="100">
+      <el-table-column label="头像" align="center" prop="avatarUrl" width="100">
         <template #default="scope">
           <image-preview :src="scope.row.avatarUrl" :width="50" :height="50"/>
         </template>
@@ -201,8 +220,20 @@
       <el-table-column label="用户位置" align="center" prop="location" />
       <el-table-column label="用户领域" align="center" prop="field" />
       <el-table-column label="用户国籍" align="center" prop="nation" />
-      <el-table-column label="GitHub地址" align="center" prop="htmlUrl" />
+<!--      <el-table-column label="GitHub主页地址" align="center" prop="htmlUrl" />-->
+<!--      <el-table-column label="代表项目地址" align="center" prop="repositoryUrl" />-->
+      <el-table-column label="GitHub主页地址" align="center" prop="htmlUrl">
+        <template #default="scope">
+          <a :href="scope.row.htmlUrl" class="link-style" target="_blank" rel="noopener noreferrer">{{ scope.row.htmlUrl }}</a>
+        </template>
+      </el-table-column>
+      <el-table-column label="代表项目地址" align="center" prop="repositoryUrl">
+        <template #default="scope">
+          <a :href="scope.row.repositoryUrl" class="link-style" target="_blank" rel="noopener noreferrer">{{ scope.row.repositoryUrl }}</a>
+        </template>
+      </el-table-column>
       <el-table-column label="人才指数" align="center" prop="talentRank" />
+      <el-table-column label="评估信息" show-overflow-tooltip align="center" prop="assessment" />
       <el-table-column label="公司" align="center" prop="company" />
       <el-table-column label="博客链接" align="center" prop="blog" />
       <el-table-column label="电子邮件" align="center" prop="email" />
@@ -213,7 +244,6 @@
       <el-table-column label="公共Gist数量" align="center" prop="publicGists" />
       <el-table-column label="粉丝数量" align="center" prop="followers" />
       <el-table-column label="关注的用户数量" align="center" prop="following" />
-      <el-table-column label="项目URL" align="center" prop="repositoryUrl" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['test:developers:edit']">修改</el-button>
@@ -239,7 +269,7 @@
         <el-form-item label="真实姓名" prop="name">
           <el-input v-model="form.name" placeholder="请输入真实姓名" />
         </el-form-item>
-        <el-form-item label="头像URL" prop="avatarUrl">
+        <el-form-item label="头像" prop="avatarUrl">
           <image-upload v-model="form.avatarUrl"/>
         </el-form-item>
         <el-form-item label="用户位置" prop="location">
@@ -326,6 +356,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     field: null,
+    nation: null
   },
   rules: {
     login: [
@@ -338,7 +369,7 @@ const { queryParams, form, rules } = toRefs(data);
 
 /** 查询开发者信息列表 */
 function getList() {
-  // loading.value = true;
+  loading.value = true;
   listDevelopers(queryParams.value).then(response => {
     console.log(response)
     developersList.value = response.data.list;

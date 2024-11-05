@@ -35,7 +35,7 @@
 <!--      </el-form-item>-->
       <el-form-item>
 <!--        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>-->
-<!--        <el-button icon="Refresh" @click="resetQuery">重置</el-button>-->
+        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
         <el-button icon="Refresh" @click="startGetDeveloper" >拉取数据</el-button>
       </el-form-item>
     </el-form>
@@ -84,7 +84,7 @@
 
     <el-table v-loading="loading" :data="tasksList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键ID，自动增长" align="center" prop="id" />
+      <el-table-column label="ID" align="center" prop="id" />
 <!--      <el-table-column label="领域" align="center" prop="field" />-->
       <el-table-column label="领域" align="center" prop="field">
         <template #default="{ row }">
@@ -93,17 +93,17 @@
           </a>
         </template>
       </el-table-column>
-      <el-table-column label="任务状态：PENDING(待执行), RUNNING(执行中), COMPLETED(已完成), FAILED(失败)" align="center" prop="status" />
+      <el-table-column label="任务状态" align="center" prop="status"   :formatter="statusFormatter" />
       <el-table-column label="上次执行时间" align="center" prop="lastExecutionTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.lastExecutionTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.lastExecutionTime, '{y}-{m}-{d} {h}:{m}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="下次执行时间" align="center" prop="nextExecutionTime" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.nextExecutionTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
+<!--      <el-table-column label="下次执行时间" align="center" prop="nextExecutionTime" width="180">-->
+<!--        <template #default="scope">-->
+<!--          <span>{{ parseTime(scope.row.nextExecutionTime, '{y}-{m}-{d}') }}</span>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
       <el-table-column label="上次失败信息" align="center" prop="lastFailureMessage" />
 <!--      <el-table-column label="逻辑删除" align="center" prop="deleted" />-->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -191,6 +191,7 @@ const data = reactive({
     lastFailureMessage: null,
     deleted: null
   },
+
   rules: {
     field: [
       { required: true, message: "领域不能为空", trigger: "blur" }
@@ -228,7 +229,15 @@ function getList() {
     loading.value = false;
   });
 }
-
+function statusFormatter(row, column, cellValue, index) {
+  const statusMap = {
+    PENDING: '待执行',
+    RUNNING: '执行中',
+    COMPLETED: '已完成',
+    FAILED: '失败'
+  };
+  return statusMap[cellValue] || cellValue;
+}
 function startGetDeveloper(){
   startGetDeveloperByField(queryParams.value).then(response => {
     if (response.code == 200){
